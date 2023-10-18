@@ -1,0 +1,396 @@
+---
+title: "2_Vector_Data_Structures"
+output: html_document
+date: "2023-10-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Learning Objectives
+
+We will work to
+
+**2.1 Understand the content of spatial dataframes and the different geometry types**
+
+-   Why: An understanding of the structure of spatial dataframes allows for accurate manipulation and analysis, while recognizing different geometry types allows for nuanced representation of various geographic features.
+
+**2.2 Create thematic maps and understand the information depicted**
+
+-   Thematic maps visually communicate spatial patterns, enabling intuitive interpretation and comparison of spatial patterns and data distributions.
+
+**2.3 Navigate different coordinate reference systems (CRS)**
+
+-   CRS knowledge, including encoding, transformation, and selection, ensures accurate integration of spatial data from various sources.
+
+------------------------------------------------------------------------
+
+### Overview
+
+Some of the questions we hope to answer are
+
+1.  Spatial data structure
+
+    -   What defines a spatial dataframe
+
+    -   Which base R dataframe functions are applicable to spatial dataframes
+
+2.  Basic Plotting
+
+    -   what is the difference between plotting data of, for example, an XY plot versus mapping said data
+
+3.  Coordinate Reference Systems (CRS)
+
+    -   What are different ways to transform earths shape and size to best suit our analysis
+
+------------------------------------------------------------------------
+
+## **2.1. Spatial Data Structure**
+
+[**Objective: Understand the content of spatial dataframes and the different geometry types**]{.underline}
+
+*Intro to section*
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### A. Defining spatial dataframes
+
+*Summary of files included in R spatial dataframes*
+
+Introduction to sf library and [ESRI shapefile](https://en.wikipedia.org/wiki/Shapefile).
+
+```{r}
+
+library(sf)
+```
+
+The types of files we handle when dealing with R spatial dataframes are:
+
+-   ...
+
+-   ...
+
+**Additional info:** The [Geocomputation with R](https://geocompr.robinlovelace.net/) textbook (Lovelace, Nowosad, and Muenchow, 2019) and the [R sf package](https://r-spatial.github.io/sf/) webpage.
+
+------------------------------------------------------------------------
+
+### B. Understanding spatial df content
+
+*Summary of information contained within a spatial dataframe*
+
+```{r}
+
+st_read 
+st_geometry #extracting geometry column- fundamental to an sf object by definition 
+#other common base R functions functions 
+#TRANSITION: # use the idea that the geometry column is the main distincition between sf and base R dataframe
+```
+
+The information contained within a spatial dataframe includes:
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### C. Understanding congruencies between base R and spatial dataframes
+
+*Summary of how* *working with a spatial dataframes is similar to working with a base R dataframe*
+
+```{r}
+
+dim
+str 
+class #r dataframe and sf object with additional meta data
+
+#TRANSITION: #other subsetting and use a subsetted portion to go into plotting 
+#explain why the geometry column is stick (stays when dataframe is subsetted)
+
+st_as_sf #(?)
+```
+
+Question or challenge: could be around developing an X Y plot of the same data that we plot in section 5: and this is what is used to get at the essential question of what additional insight a spatial dimension gives
+
+Working with a spatial dataframes is similar to working with a base R dataframe because
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### D. ... geometry types
+
+*Summary on the different ways spatial data can be formatted (e.g. what are the different spatial geometries)*
+
+Define points, lines and polygons, and their multi-equivalents
+
+(maybe define Well Known Text - why is this important though\*\*)
+
+![](https://datacarpentry.org/organization-geospatial/fig/dc-spatial-vector/pnt_line_poly.png){width="450"}
+
+```{r}
+
+#TBD
+
+#TRANSITION: #lets see how we can plot each different type of geometry
+```
+
+Question: something along the lines of one geometry type within another geometry type, or so... (use as a transition into plotting
+
+The different spatial geometries include:
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### E. Vector data structure summary 
+
+\*\* could reformat to be a challenge?
+
+we learned that ..., thus are able to use -- (functions) to ... (\*\* focus on the functions used and not on content, the content focus comes at the end of each subsection)
+
+1.  The types of files we handle when dealing with R spatial dataframes are:
+
+    1.  responds, and new function used
+
+2.  The information contained within a spatial dataframe includes:
+
+    1.  ...
+    2.  st_read
+
+3.  Working with a spatial dataframe is similar to working with a base R dataframe because:
+
+    1.   st_as_sf
+
+4.  Different ways spatial data can be formatted/ different spatial geometries include:
+
+5.  Fundamentals ways to visualize spatial data include:
+
+    1.  plot
+
+6.  The formats spatial dataframes take on include:
+
+    1.  ...
+
+    2.  st_write
+
+------------------------------------------------------------------------
+
+# 2.2 Basic plotting 
+
+[**Objective: Create thematic maps and understand the information depicted**]{.underline}
+
+*Intro to section*
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### A. Thematic maps
+
+*summary on ways to visualize spatial data and what information is contained in these visualizations*
+
+-   ...
+
+```{r}
+
+plot 
+#plot data e.g. med age using XY plot then using
+#chloropleth map - to answer 
+
+
+```
+
+### B. Overlay Plotting 
+
+*summary of the concept of overlay*
+
+-   ...
+
+```{r}
+
+plot 
+#overlaying plots, border and fill colors etc. 
+```
+
+Some fundamentals ways to visualize spatial data, and the information contained include
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### C. Basic Plotting summary 
+
+we learned that ..., thus are able to use -- (functions) to ... (\*\* focus on the functions used and not on content, the content focus comes at the end of each subsection)
+
+1.  Fundamentals ways to visualize spatial data include:
+
+    1.  plot
+    2.  
+
+------------------------------------------------------------------------
+
+### Challenge 1:
+
+```{r}
+TBD
+```
+
+------------------------------------------------------------------------
+
+# **2.3 Coordinate Reference Systems**
+
+[**Objective: Navigate different coordinate reference systems (CRS)**]{.underline}
+
+*Intro to section*
+
+-   Define a CRS
+
+-   Why are CRS' important
+
+------------------------------------------------------------------------
+
+### A. Geographic vs. projected CRS
+
+*Summary on the main types of coordinate reference systems (CRS)*
+
+-   ...
+
+-   ... (example below)
+
+![](https://www.earthdatascience.org/images/earth-analytics/spatial-data/spatial-projection-transformations-crs.png)
+
+##### Geographic CRSs
+
+-   `4326: WGS84` (units decimal degrees) - the most commonly used geographic CRS
+
+-   `4269: NAD83` (units decimal degrees) - a geographic CRS customized to best fit the USA. This is used by most geographic data produced by US federal agencies including the Census.
+
+    -   `NAD83 (epsg:4269)` and `WGS84(epsg:4326)` geographic data can be considered equivalent although locations can differ by up to 1 meter in the continental USA and elsewhere up to 3m. That is not a big issue with census tract data as these data are only accurate within +/-7meters.
+
+##### Projected CRSs
+
+-   `5070: USA CONUS NAD83` (units meters) projected CRS for mapping the entire contiguous USA (CONUS)
+
+-   `3857: Web Mercator` (units meters) conformal (shape preserving) CRS used as the default in web mapping
+
+-   `3310: CA Albers Equal Area, NAD83` (units meters) projected CRS for CA statewide mapping and spatial analysis
+
+-   `102641 to 102646: CA State Plane zones 1-6, NAD83` (units feet) projected CRS used for local analysis.
+
+```{r}
+st_crs
+```
+
+The main types of CRS include (and they differ because):
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### B. Briefing on CRS codes
+
+*Summary of how CRS are encoded & extracting CRS codes*
+
+What do you need to know when working with CRS'
+
+-   What CRSs are used in your study area and their main characteristics
+
+-   How to identify, or `get`, the CRS of a spatial dataframe
+
+-   How to `set` the CRS of spatial dataframe (i.e. define the projection)
+
+```{r}
+st_crs
+```
+
+CRS codes:
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### C. CRS Reprojections
+
+*Summary on CRS transformations (needs work)*
+
+-   cautions on reprojecting
+
+```{r}
+
+st_transform()
+```
+
+CRS transformatios (needs work)
+
+-   ...
+
+-   ...
+
+------------------------------------------------------------------------
+
+### D. Saving spatial dataframes (and plots (?))
+
+*Summary of different formats that spatial dataframes take on*
+
+-   ...
+
+-   ...
+
+```{r}
+
+st_write #.shp, .json, .gpkg etc.
+#differences between shp = ,ultiple files, geojson = 1
+#changing extensions
+#difference with saving CSV file, using layers_option, and explantion of "Well Known Text" 
+#clarify whether the CRS is stored with CSV
+```
+
+Spatial dataframes can be saved as
+
+-   different file extensions which ...
+
+------------------------------------------------------------------------
+
+### E. CRS summary
+
+we learned to
+
+1.  the main types of CRS's include
+    1.  \*\* mention relation to one another
+2.  CRS's are encoded using:
+    1.  ...
+    2.  st_crs
+3.  Data can be formated to fit more suitable CRSs via:
+    1.  ...
+    2.  st_transform
+4.  The formats spatial dataframes take on include:
+    1.  ...
+    2.  st_write
+
+------------------------------------------------------------------------
+
+### Challenge 2:
+
+```{r}
+TBD
+```
+
+------------------------------------------------------------------------
