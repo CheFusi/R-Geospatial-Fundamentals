@@ -1,0 +1,689 @@
+---
+title: "Mapping"
+output: html_document
+date: "2024-01-11"
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning Objectives
+
+Welcome to R Geospatial Fundamentals. Our goals for today's workshop are:
+
+1.  **Effectively represent data using color, symbols, and other visual elements to highlight patterns in categorical data**
+
+2.  **Understand data transformation and classification schemes for plotting vector data**
+
+3.  **Interpret maps**
+
+------------------------------------------------------------------------
+
+## Basis of plotting geospatial data
+
+-   
+
+-   
+
+-   It's important to understand the source of your data, which details important information such as what defines the boundary lines and so on
+
+We'll start off using the `plot` function
+
+[Load libraries]{.underline}
+
+```{r}
+
+library(here) #provides a here() command that builds file paths from the project directory
+library(sf)
+library(tmap)
+```
+
+[Load in datasets]{.underline}
+
+```{r}
+
+#read in the shapefile
+counties = st_read(dsn = here("data",  #dsn= data source name
+                              "california_counties", 
+                              "CaliforniaCounties.shp"))
+
+#read in the schools_sf shapefile using a slightly different syntax
+schools_sf = st_read(here("data",
+                               "California_Schools_2019-20",
+                               "SchoolSites1920.shp"))
+
+
+#data sources: 
+# counties: https://gis.data.ca.gov/datasets/8713ced9b78a4abb97dc130a691a8695 
+# schools_sf: https://gis.data.ca.gov/datasets/f7f818b0aa7a415192eaf66f192bc9cc
+```
+
+### Plotting Geometries
+
+[Visualize what the geometry means]{.underline}
+
+```{r}
+
+#plot the grometry column of the schoo_sf dataframe
+plot(schools_sf$geometry,col = 'purple')
+```
+
+🔔 **Question**: Based on this plot, can you tell what type of geometry the schools_sf dataframe has?
+
+```{r}
+
+#plot the grometry column of the schoo_sf dataframe
+plot(counties$geometry) 
+```
+
+🔔 **Question**: How do we know what the geometry we are plotting represents e.g. a census tract or county boundaries?
+
+### Overlay Plotting
+
+-   Map overlays a powerful method for visualizing spatial data
+
+-   We can create these with the basic `plot` command.The `add=TRUE` argument is what sets up the overlay
+
+[Overlay plots using the `plot` function]{.underline}
+
+```{r}
+
+#plot the two geometries together
+plot(counties$geometry, col ="lightgrey",border = 'grey')
+plot(schools_sf$geometry,col = 'purple', add = TRUE)
+
+#overlaying plots, border and fill colors etc. 
+```
+
+🔔 **Question**: Why isn't the schools geometry visible? And how can we fix this?
+
+[Transform CRS Codes]{.underline}
+
+```{r}
+
+# change the CRS of the schools spatial dataframe to match the counties dataframe
+schools_sf_NAD83 = st_transform(schools_sf, crs= st_crs(counties))
+
+#verify that the two datasets are in the same CRS
+st_crs(schools_sf_NAD83) == st_crs(counties) 
+```
+
+[Overlay plot the two datasets with the matching CRS codes]{.underline}
+
+```{r}
+
+#plot transformed CRS's
+plot(counties$geometry, col ="lightgrey",border = 'grey')
+plot(schools_sf_NAD83$geometry, col='purple', add=T)
+
+```
+
+### Creating Interactive Plots
+
+-   There are other mapping packages available that allow for nuanced depictions of data, depending on the application. Let's explore a few of them.
+
+`tmap` is one option for mapping that additionally allows for visually maps in both static and interactive modes
+
+```{r}
+
+#load in the tmap package
+library(tmap)
+
+# plot a 'quick tmap'
+qtm(counties) 
+```
+
+[Switch between tmap's static to interactive mode]{.underline}
+
+```{r}
+
+# toggle the mode (or ttm!)
+ttm()
+
+#plot the counties data in 
+qtm(counties) #see warning 
+```
+
+-   Sometimes during data creation or processing, polygon geometry gets a bit messed up. It may look great but one or more of the polylines may self-intersect or not close (i.e. snap to a node). This can cause some functions to return an error message or warning. The tmap_option check.and.fix and repair invalid geometry so that it can render an interactive or static map properly. You can also use the sf function st_make_valid to repair invalid geometry. See the function documentation for more information.
+
+```{r}
+
+#fix the data
+tmap_options(check.and.fix = TRUE)
+counties<-st_make_valid(counties)
+schools_sf_NAD83<-st_make_valid(schools_sf_NAD83)
+
+
+#plot the counties data in interactive mode
+qtm(counties)
+
+```
+
+-   some interactive features are zooming in an out, and toggling over/clicking a geometry to view its attribute data
+
+The syntax for creating tailored plots using `tmap` is similar to that of `ggplot2`. `tmap` geometry functions (`tm_polygons`, `tm_dots`, etc.) allow you to plot the various geometries, and build layers onto the map
+
+[Exploring more editing options]{.underline}
+
+```{r}
+
+#switch back to static mode
+ttm()
+
+# use the `tm_shape` function to create a tmap object
+tm_shape(counties) +  
+  tm_polygons(col = 'tan', # add the appropriage geometry, e.g.`tm_polygons` layer
+              border.col = 'darkgreen', #make the color of the borders green
+              alpha = 0.5) # make the fill color 50% transparent
+```
+
+[Overlay plotting with tmap]{.underline}
+
+```{r}
+
+tm_shape(counties) +  
+  tm_polygons(col = 'tan', 
+              border.col = 'darkgreen', 
+              alpha = 0.5)+ #note that you use tm_shape first to call the dataset, before later calling what it is. e.g. dots or lines. Just like ggplot
+  tm_shape(schools_sf_NAD83) +
+  tm_dots(col = 'purple', 
+          border.col = 'white', 
+          border.lwd = 1, 
+          size = 0.01)
+
+#click into one geometry and see info given
+```
+
+🔔 **Question**: Notice the one school that seems to be outside of California boundaries? What is an easy way to learn more about this datum?
+
+------------------------------------------------------------------------
+
+## 🥊 Challenge 1: ...
+
+Plot the schools_sf dataframe using tmap
+
+-   .... questions
+
+```{r}
+# You may have some starter code for the challenge that you can put in its own cell.
+# Always have a following cell that says "YOUR CODE HERE" with a few empty lines beneath it, so that attendees know where to put their code.
+```
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+------------------------------------------------------------------------
+
+## Improving data visualization with thematic maps
+
+The goal of a thematic map is to use color to visualize the spatial distribution of a variable in order to identify trends and outliers.
+
+-   Thematic maps visually communicate spatial patterns, enabling intuitive interpretation and comparison of patterns and data distributions.
+
+-   Thematic maps use color to quickly and effectively convey information. For example, maps use brighter or richer colors to signify higher values, and leverage cognitive associations such as mapping water with the color blue.
+
+Let's create some thematic maps with ggplot:
+
+[Load libraries]{.underline}
+
+```{r}
+
+library(ggplot2)
+```
+
+[Plot county data using ggplot]{.underline}
+
+```{r}
+
+#counties$NAME<-as.factor(counties$NAME)
+
+p1 <- ggplot(counties, aes(x = NAME, y = MED_AGE)) +
+  geom_col() + #plot the data as bar plots 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # adjust the angle of the x-axis text for easier visualization
+p1
+```
+
+🔔 **Question**: Alameda and San Francisco county neighbor one another, how easy is it to relate the median ages of the two counties using this plot?
+
+Visualizing the data using this plot emphasizes numerical relationships, while a thematic map places additional emphasis on the geographic distribution of data. Herein lies a a key benefit of geospatial analyses.
+
+------------------------------------------------------------------------
+
+There are three main techniques for improving data visualization:
+
+A. Color palettes
+
+B. Data transformations
+
+C. Classification schemes
+
+### A. Color Palettes
+
+Plotting data using XY plot versus mapping adds the additional spatial dimension, via the geometry column, allows you to visualize how data varies across geographical regions.
+
+```{r}
+library(ggplot2)
+
+ggplot(counties, aes(fill = MED_AGE)) + 
+  geom_sf() +  # tells ggplot that geographic data are being plotted
+  #scale_fill_viridis_c() +
+  theme_minimal() + 
+  labs(title = "Median Age per County")
+
+```
+
+There are three main types of color palettes (or color maps), each of which has a different purpose: diverging, sequential, and qualitative
+
+![](http://www.gnuplotting.org/figs/colorbrewer.png)
+
+💡 **Tip**: Sites like [ColorBrewer](https://colorbrewer2.org/#type=sequential&scheme=Blues&n=3) let's you play around with different types of color maps.
+
+Let us visualize the same data using all 3 types of palettes.
+
+[load the library]{.underline}
+
+```{r}
+
+library(RColorBrewer)
+```
+
+To see the names of all color palettes available, try the following command. You may need to enlarge the output image.
+
+```{r}
+RColorBrewer::display.brewer.all()
+```
+
+1.  **Diverging color palette** - a "diverging" set of colors are used so emphasize mid-range values as well as extremes.
+
+[Plot data with a diverging pallete]{.underline}
+
+```{r}
+
+Div_plot <- ggplot(counties, aes(fill = MED_AGE)) + 
+  geom_sf() +
+  scale_fill_gradientn(colors = brewer.pal(11, "RdBu")) + # Diverging red-blue color palette
+  theme_minimal() + 
+  labs(title = "Median Age per County")
+
+Div_plot
+```
+
+This is considered a `proportional color map` because the colors are linearly scaled to the data values. The legend has a continuous color ramp rather than discrete data ranges.
+
+2.  **Sequential color palette** - usually with a single or multi color hue to emphasize differences in order and magnitude, where darker colors typically mean higher values
+
+Now you try it! Plot the MED_AGE counties data using a sequential palette
+
+-   What should you change `"RdBu"` to if you wanted a green sequential palette?
+-   Hint: you can take a look at the `RColorBrewer::display.brewer.all()` to find the correct syntax
+
+[Plot data with a sequential pallete]{.underline}
+
+```{r}
+
+Seq_plot <- ggplot(counties, aes(fill = MED_AGE)) + 
+  geom_sf() +
+  scale_fill_gradientn(colors = brewer.pal(9, "Greens")) + # Sequential greens color palette
+  theme_minimal() + 
+  labs(title = "Median Age per County")
+  
+Seq_plot
+```
+
+🔔 **Question**: Do you see any preliminary patterns in this map?
+
+3.  **Qualitative color palette** - a contrasting set of colors to identify distinct categories and avoid implying quantitative significance.
+
+[load libraries]{.underline}
+
+```{r}
+
+# load the library that will allow subsetting of data
+library(dplyr)
+```
+
+```{r}
+
+
+#subset for the counties that have a median age greater than 32
+some_counties<- counties %>% filter(MED_AGE<=32)
+#the qualitative color palettes in rbrewer limit the number of colors to 8. To use a qualitativr palette with more colors, you can create your own
+
+Qual_plot <- ggplot() +
+  geom_sf(data = some_counties, aes(fill = NAME)) +
+  scale_fill_manual(values = brewer.pal(8, "Pastel2")) + #Qualitative pastel color pallette
+  theme_minimal() +
+  labs(title = "Selected Counties")
+
+Qual_plot
+```
+
+🔔 **Question**: What is lacking from this qualitative map?
+
+[Overlay plots with ggplot]{.underline}
+
+```{r}
+
+# over the counties geometry onto the subset_counties plot
+Qual_plot_overlay <- ggplot() +
+  geom_sf(data = counties, color = "black", fill = "transparent") +
+  geom_sf(data = some_counties, aes(fill = NAME)) +
+  scale_fill_manual(values = brewer.pal(8, "Pastel2")) +
+  theme_minimal() +
+  labs(title = "Counties with Median Age < or = 32 Highlighted")
+Qual_plot_overlay
+```
+
+🔔 **Question**: is this a `proportional color map?`
+
+During exploratory mapping, it can be helpful to visualize all versions of a map on the same grid. `gridExtra` is one of the packages that allows you to visualize plots in the same image
+
+Let's visualize all 3 plots together:
+
+[Load the library]{.underline}
+
+```{r}
+
+library(gridExtra)
+```
+
+[Visualize multiple plots on one grid]{.underline}
+
+-   elements like the title and grid may be useful for individual plots, but cumbersome in joint plots. There are various ways to manipulate plots to add or remove certain elements for improved visualization
+
+```{r}
+
+# Remove title from each plot and minimize the legend to prevent overcrowding
+Div_plot_1 <- Div_plot  + theme(
+  legend.text = element_text(size = 4), #reduce the size of the legend text
+  legend.title = element_text(size = 4), #reduce the size of the legend title
+  legend.key.size = unit(0.5, "lines"), #reduce the size of the legend itself
+  plot.title = element_blank()
+)
+
+Seq_plot_1 <- Seq_plot + theme(
+  legend.text = element_text(size = 4), #reduce the size of the legend text
+  legend.title = element_text(size = 4), #reduce the size of the legend title
+  legend.key.size = unit(0.5, "lines"), #reduce the size of the legend itself
+  plot.title = element_blank()
+)
+
+Qual_plot_overlay_1 <- Qual_plot_overlay + theme(
+  legend.text = element_text(size = 4), #reduce the size of the legend text
+  legend.title = element_text(size = 4), #reduce the size of the legend title
+  legend.key.size = unit(0.5, "lines"), #reduce the size of the legend itself
+  plot.title = element_blank()
+)
+
+# combine the plots into one grid, with 3 columns
+combined_plot <- grid.arrange(Div_plot_1, Seq_plot_1, Qual_plot_overlay_1, ncol=3)
+
+# Print the combined plot
+combined_plot
+
+
+```
+
+🔔 **Question**: List some pros and cons of plotting the median age per county using the different color palettes\
+
+As a best practice, a **qualitative** color palette should not be used with **quantitative** data and vice versa.
+
+------------------------------------------------------------------------
+
+## 🥊 Challenge 2: ...
+
+1.  Which types of color palettes would most accurately represent the following data:
+    1.  ...
+    2.  ...
+    3.  ..
+2.  Select the appropriate color palette from R brewer, and plot each data using that palette.
+3.  ...
+
+```{r}
+# You may have some starter code for the challenge that you can put in its own cell.
+# Always have a following cell that says "YOUR CODE HERE" with a few empty lines beneath it, so that attendees know where to put their code.
+```
+
+```{r}
+# YOUR CODE HERE
+
+```
+
+------------------------------------------------------------------------
+
+There are two major challenges when creating thematic maps:
+
+1.  Our eyes are drawn to the color of larger areas or linear features, even if the values of smaller features are more significant.
+
+2.  The range of data values is rarely evenly distributed across all observations and thus the colors can be misleading.
+
+Selecting the appropriate color palette can help mitigate these challenges. C**lassification schemes** can improve the way data values are associated with colors.
+
+------------------------------------------------------------------------
+
+## Transforming Count Data
+
+-   Data aggregation is where individual-level data e.g. data from people, households, or businesses are summarized into higher geographic levels such as states, counties, or census tracts
+
+-   Aggregated data such as counts (e.g. the total population in a state) presents a broader overview
+
+-   To make these counts more comparable across regions, especially those that differ greatly in size, data is transform into normalized variables.
+
+-   Normalized variables including densities, proportions, or ratios, provide a standardized basis for comparison, allowing for more meaningful understanding of trends and patterns
+
+Let's transform **count** data using **densities**, **proportions**, and **ratios** and visualize the data using `tmap`:
+
+-   `tmap` (which stands for thematic maps) creates maps using using syntax similar to `ggplot2`. `tmap` plots the different geometries (points, lines, polygons) using `tm_symbols`, `tm_lines`, and `tm_polygon` respectively.
+
+**A. Visualizing data as Counts**
+
+Count data are counts, aggregated by feature (county)
+
+-   e.g. population within a county
+
+[plot count data using `tmap`]{.underline}
+
+```{r}
+
+# Map of individuals who identify with multiple races
+Count_plot <- tm_shape(counties) +
+  tm_polygons(col='MULT_RACE', alpha=0.5, #alpha specifies the level of transparency
+              palette="Greens", #syntax for specifying color pelettes with tmap plots
+              title = "number of multi-race individuals")
+
+
+Count_plot
+```
+
+-   The data is aggregated by county boundaries and shows the number of people who identify with multiple races per county.
+
+🔔 **Question**: What happens if there are more people in a county?
+
+Let's look at the distribution of the data using a histogram.
+
+[plotting data distribution via a histogram]{.underline}
+
+```{r}
+
+#plotting the distribution of people who identify with multiple races per county
+hist(counties$MULT_RACE,
+     breaks = 40, # number of bins that the range of values is divided into
+     main = 'number of multi-race individuals') #title 
+```
+
+-   the distribution shows that many people fall on the lowest end of the distribution, and there seems to be an outlier at the highest end.
+
+-   such an uneven distribution is not accurately represented using count data
+
+-   The basic cartographic rule is that when mapping data for areas that differ in size you rarely map counts since those differences in size make the comparison less valid or informative.
+
+Data transformations overcome these limitations of count data.
+
+**B. Visualizing data as Densities**
+
+Density data is counts aggregated by feature (county) and normalized by feature area
+
+-   *e.g. number of individuals who identify with multiple races per square mile within a county*
+
+[Transform data based on area]{.underline}
+
+```{r}
+
+#View the data to identify column containing county area
+colnames(counties)
+# the "SQ_MILES" column contains the area of each county in square miles
+
+#create a new column that contains the multi_race density data
+counties$MULT_RACE_SQ_MILE<-counties$MULT_RACE/counties$SQ_MI
+
+Density_plot<- tm_shape(counties) +
+  tm_polygons(col='MULT_RACE_SQ_MILE', alpha=0.5,
+              palette="Greens",
+              title = "number of multi-race individuals per square mile")
+Density_plot
+```
+
+🔔 **Question**: What are some changes we can make to the map that may highlight certain trends better
+
+[Change the tmap color palette and translucency]{.underline}
+
+```{r}
+
+Density_plot_2<- tm_shape(counties) +
+  tm_polygons(col='MULT_RACE_SQ_MILE', alpha=0.8,
+              palette="YlOrRd",
+              title = "number of multi-race individuals per square mile")
+Density_plot_2
+```
+
+Visualizing tmap plots side-by-side
+
+```{r}
+
+#install.packages("tmaptools")
+library(tmaptools)
+
+# Assuming you have tmap plots named plot1, plot2, plot3, and plot4
+Density_plot_combined <- tmap_arrange(Density_plot, Density_plot_2, ncol = 2)
+
+Density_plot_combined 
+```
+
+🔔 **Question**: How can you easily view the county(ies) that have a high number of individuals that identify with multiple races?
+
+```{r}
+ttm()
+
+Density_plot
+```
+
+Normalizing data via densities makes the data more accurate in some cases and more comparable across regions of different sizes.
+
+**C. Visualizing data as Percents/Proportions**
+
+**Proportions / Percentages data** represents datain a specific category divided by the total value across all categories
+
+-   *e.g. number of individuals that identify with multiple races, as a percent of the total county population*
+
+Now you try it! Plot the 'MULT_RACE counties data as a percent
+
+-   What should you divide `counties$MULT_RACE` to convert it to a percent?
+-   Hint: use the total population in 2012
+
+```{r}
+
+#create a new column that contains the multi_race proportion data
+counties$MULT_RACE_PERC<-counties$MULT_RACE/counties$POP2012 *100
+
+Percent_plot <- tm_shape(counties) +
+  tm_polygons(col='MULT_RACE_PERC', alpha=0.5,
+              palette="YlOrRd",
+              title = "number of multi-race individuals per total county percent")
+Percent_plot
+```
+
+## 🥊 Challenge 3: **Visualizing data as Ratios**
+
+**D. Visualizing data as Ratios**
+
+**Rates / Ratios data** represent a value in one category divided by value in another category
+
+-   Create a new variable "MULT_to_OTHER" that is the ratio of the number of individuals that identify with multiple races to the number of individuals who identify as "OTHER"
+
+-   plot a histogram to see the distribution
+
+-   create a plot, named Ratio_plot, of this distribution using `tmap`, and a diverging color palette
+
+-   identify the county with the highest ratio
+
+-   combine this and the three previous plots onto one grid
+
+```{r}
+# YOUR CODE HERE
+
+
+
+
+```
+
+------------------------------------------------------------------------
+
+### **Solution**
+
+```{r}
+counties$MULT_to_OTHER<-counties$MULT_RACE/counties$OTHER
+
+#plotting the distribution of people who identify with multiple races per county
+hist(counties$MULT_to_OTHER,
+     breaks = 40, # number of bins that the range of values is divided into
+     main = 'ratio of multi-race to other') #title 
+
+Ratio_plot <- tm_shape(counties) +
+  tm_polygons(col='MULT_to_OTHER', alpha=0.8,
+              palette="PiYG",
+              title = "... ")
+Ratio_plot 
+
+
+Tranform_plot_combined <- tmap_arrange(Count_plot, Density_plot, Percent_plot, Ratio_plot, ncol = 4)
+
+Tranform_plot_combined 
+```
+
+Transformations help with ... C**lassification schemes** can improve the way data values are associated with colors.
+
+------------------------------------------------------------------------
+
+## Saving spatial dataframes (and plots (?))
+
+*Summary of different formats that spatial dataframes take on*
+
+-   ...
+
+-   ...
+
+```{r}
+
+st_write #.shp, .json, .gpkg etc.
+#differences between shp = ,ultiple files, geojson = 1
+#changing extensions
+#difference with saving CSV file, using layers_option, and explantion of "Well Known Text" 
+#clarify whether the CRS is stored with CSV
+```
+
+Spatial dataframes can be saved as
+
+-   different file extensions which ...
+
+------------------------------------------------------------------------
+
+## Key Points
+
+\<Summary of what was learned in today's workshop.\>
+
+-   \<key point 1\>
