@@ -76,7 +76,7 @@ counties = st_read(dsn = here("data",
                               "california_counties", 
                               "CaliforniaCounties.shp"))
 
-#fix any potential issues with the counies geometry
+#fix any potential issues with the counties geometry
 counties <- st_make_valid(counties)
 
 #avisualize the geometry
@@ -366,7 +366,7 @@ datasets]{.underline}
 
 ```{r}
 
-# tranform the CRS' to match
+# tranform the CRS' to match using 2 methods
 schools_utm10 <- st_transform(schools_sf, 26910) #assign the CRS based on the EPSG code
 bart_lines_utm10 = st_transform(bart_lines, st_crs(schools_utm10 )) #assign the CRS based on the first dataset
 
@@ -375,14 +375,14 @@ View(bart_lines_utm10) #note that there are 6 bart line segments
 
 ```{r}
 
-#calculate the distance between Berkeley High and each portion of bike blv
+#calculate the distance between Berkeley High and each portion of the BART line
 st_distance(schools_utm10[schools_utm10$SchoolName=='Berkeley High',], bart_lines_utm10)
 
 ```
 
 note the format of the output. the `st_distance()` calculates the
 distance from the point location of the school and each segment of the
-bike boulevard.
+BART lines
 
 🔔 **Question**: since the dataframe itself does not contain explicit
 information about the 6 BART lines, how can one better understand the
@@ -391,10 +391,10 @@ data?
 -   Metadata, including those sometimes contained with the shapefiles
     may provide additional information.
 
-There are different ways to determine which section of the bike
-boulevard to calculate the distance to, for instance, to the nearest
-point of the line geometry, which depend on the goal of the analysis.
-See the `?st_distance()` documentation for more details.
+There are different ways to determine which section of the BART lines to
+calculate the distance to, for instance, to the nearest point of the
+line geometry, which depend on the goal of the analysis. See the
+`?st_distance()` documentation for more details.
 
 Measurement queries focus on how the features of and **within** a single
 geometry relate. Relationship queries relate elements of two geometries.
@@ -423,7 +423,7 @@ spatial relationship to another.
 
 Let's take a look at a few relationship queries.
 
-1.   Spatial Intersections
+1.  Spatial Intersections
 
 Geometry A spatially intersects Geometry B if any of its parts (e.g., a
 point, line segment, or polygon) is equivalent to, touches, crosses, is
@@ -615,7 +615,7 @@ borders]{.underline}
 
 ```{r}
 
-#plotting bike blvd 200m buffer and all schools within Alameda
+#plotting the BART lines 200m buffer and all schools within Alameda
 bart_Alameda_plot <- tm_shape(Alameda_county_utm10) + 
   tm_polygons(col = 'lightgrey') + 
 tm_shape(bart_lines_utm10) + 
@@ -646,7 +646,7 @@ bart_Alameda_buffer_continuation_plot
 
 Great! Looks like we're all ready to run our spatial relationship query
 to complete the proximity analysis. At this point (pun intended) select
-the schools that are in within the bike boulevard buffer polygons.
+the schools that are in within the BART line buffer polygons.
 
 ```{r}
 
@@ -658,7 +658,7 @@ Now let's overlay again, to see if the schools we selected make sense.
 
 ```{r}
 
-# highlight the schools interrsect the bike boulevart buffer in yellow
+# highlight the schools interrsect the BART line buffer in yellow
 bart_Alameda_buffer_continuation_intersect_plot <- bart_Alameda_buffer_continuation_plot +  
 tm_shape(Continuation_Alameda_utm10_bart_buf) + 
   tm_dots(col = 'yellow', size = 0.2) 
@@ -672,8 +672,8 @@ tm_shape(Continuation_Alameda_utm10_bart_buf) +
 
 -   You can use `st_distance` and its companion function
     `st_nearest_feature` to compute the distance between each feature of
-    A and the nearest in B e.g. each school and the nearest bike
-    boulevard.
+    A and the nearest in B e.g. a middle school and the nearest high
+    school.
 
 -   the `st_nearest_feature` function returns the ID of the closest
     feature.
